@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 from skimage.feature import graycomatrix, graycoprops
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, accuracy_score
 
 img = cv2.imread('C.jpeg')
 
@@ -9,10 +12,8 @@ cv2.waitKey(0)
 
 # Convert to graycsale
 img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-cv2.imshow('Grayscale', img_gray)
 # Blur the image for better edge detection
 img_blur = cv2.GaussianBlur(img_gray, (3, 3), 0)
-cv2.imshow('Gaussian Blur', img_blur)
 
 # Sobel Edge Detection
 sobelx = cv2.Sobel(src=img_blur, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=5)  # Sobel Edge Detection on the X axis
@@ -98,4 +99,21 @@ if circles is not None:
         # Print the extracted GLCM features
         for feature_name, feature_value in zip(properties, glcm_features):
             print(f'{feature_name}: {feature_value}')
+
+coin_labels = ["5-1.jpeg", "5-2.jpeg", "5-3.jpeg", "5-4.jpeg", "10c_O 1.png", "10c_R1.png", "10c.png", "20c_O 1.png", "20c_R1.png", "20c.png", "50c_O 1.png", "50c_R1.png", "50c.png",  "R1_O 1.png", "R1_R1.png", "R1.png",  "R2_O 1.png", "R2_R1.png", "R2.png",  "R5_O 1.png", "R5_RA.png", "R5.png", "C.jpeg", "Coins.jpeg"]
+
+X_train, X_test, y_train, y_test = train_test_split(glcm_features, coin_labels, test_size=0.2, random_state=42)
+
+
+svm_classifier = SVC()
+
+svm_classifier.fit(X_train, y_train)
+
+y_pred = svm_classifier.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Classification Report:\n", report)
 
